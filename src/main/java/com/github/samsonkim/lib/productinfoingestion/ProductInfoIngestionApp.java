@@ -24,20 +24,19 @@
 
 package com.github.samsonkim.lib.productinfoingestion;
 
-import com.github.samsonkim.lib.productinfoingestion.integration.StoreFactory;
+import com.github.samsonkim.lib.productinfoingestion.exception.ProductInfoIngestionException;
+import com.github.samsonkim.lib.productinfoingestion.integration.StoreFactoryImpl;
 import com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreSettings;
 import com.github.samsonkim.lib.productinfoingestion.model.ProductRecord;
-import com.github.samsonkim.lib.productinfoingestion.parser.FileParser;
-import com.github.samsonkim.lib.productinfoingestion.parser.FileParserLineMapper;
+import com.github.samsonkim.lib.productinfoingestion.service.ProductCatalogIntegrationService;
+import com.github.samsonkim.lib.productinfoingestion.service.ProductCatalogIntegrationServiceImpl;
 import com.github.samsonkim.lib.productinfoingestion.writer.JacksonJsonWriter;
 import com.github.samsonkim.lib.productinfoingestion.writer.JsonWriter;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -45,8 +44,11 @@ import java.util.UUID;
  */
 public class ProductInfoIngestionApp {
 
-    public static void main(String[] args) throws IOException {
-        if(args.length == 0){
+    public static void main(String[] args) throws ProductInfoIngestionException, IOException {
+        if (args.length == 0 ||
+                Optional.of(args[0])
+                        .filter(s -> s.length() > 0)
+                        .equals(Optional.empty())) {
             System.err.println("Filename is required");
             System.exit(1);
         }
@@ -57,53 +59,26 @@ public class ProductInfoIngestionApp {
         app.run(fileName);
     }
 
-    public void run(String fileName) throws IOException {
+    public void run(String fileName) throws IOException, ProductInfoIngestionException {
         JsonWriter jsonWriter = new JacksonJsonWriter();
 
-        /*
-        TODO storeName, json file handling
-
-        Also pass in storeJournalId, locale in constructor
-
-        Skip 0000 products... only allow products that have pricing
-        Add tests to factor them in
-
-        TODO zero out all others for precedence rule...
-  add tests for it.
-  add tests for the other biz rules too
-
-Store locale in product record.....
-  so multiple can exist that are translated...
-
-
-
-  TODO add catalog service that has commented notes on
-  check for valid store etc, store id
-  creating journal object
-  passing it in
-  peristing product records etc...
-         */
-
         UUID storeId = null;
-        UUID storeJournalId = UUID.randomUUID();
+        String jsonFileName = null;
 
-        if(fileName.contains("sample")){
+        if (fileName.contains("sample")) {
             storeId = SampleStoreSettings.STORE_ID;
+            jsonFileName = "sample.json";
         }
 
-        FileParserLineMapper fileParserLineMapper = StoreFactory.getFileParserLineMapper(storeId, storeJournalId);
-
-        FileParser<ProductRecord> fileParser = new FileParser<>();
-
-        InputStream inputStream = new FileInputStream(new File(fileName));
-        List<ProductRecord> productRecords = fileParser.parse(inputStream, fileParserLineMapper);
+        ProductCatalogIntegrationService productCatalogIntegrationService =
+                new ProductCatalogIntegrationServiceImpl(new StoreFactoryImpl());
+        List<ProductRecord> productRecords = productCatalogIntegrationService.ingestProductCatalog(storeId, fileName);
 
         String json = jsonWriter.writeValueAsString(productRecords);
-
-        try (PrintWriter out = new PrintWriter("sample.json")) {
+        try (PrintWriter out = new PrintWriter(jsonFileName)) {
             out.println(json);
         }
 
-        System.out.println(json);
+//        System.out.println(json);
     }
 }

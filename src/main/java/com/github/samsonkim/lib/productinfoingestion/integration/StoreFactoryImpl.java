@@ -24,14 +24,17 @@
 
 package com.github.samsonkim.lib.productinfoingestion.integration;
 
+import com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreFixedWidthFileProductRecordMapper;
+import com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreSettings;
 import com.github.samsonkim.lib.productinfoingestion.parser.FileParser;
+import com.github.samsonkim.lib.productinfoingestion.parser.FileParserImpl;
 
 import java.util.UUID;
 
 /**
  * Resolves store specific integrations
  */
-public interface StoreFactory {
+public class StoreFactoryImpl implements StoreFactory{
 
     /**
      * Returns store specific FileParser instance
@@ -40,5 +43,15 @@ public interface StoreFactory {
      * @param storeJournalId
      * @return
      */
-    FileParser getFileParser(UUID storeId, UUID storeJournalId);
+    public FileParser getFileParser(UUID storeId, UUID storeJournalId)
+    {
+        if (SampleStoreSettings.STORE_ID.equals(storeId)) {
+
+            SampleStoreFixedWidthFileProductRecordMapper mapper =
+                    new SampleStoreFixedWidthFileProductRecordMapper(storeId, storeJournalId);
+
+            return new FileParserImpl<>(mapper);
+        }
+        throw new IllegalArgumentException(String.format("Invalid store: %s", storeId));
+    }
 }

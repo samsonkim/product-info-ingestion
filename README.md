@@ -42,7 +42,7 @@ mvn clean test
 
 ## Building and running the application
 
-To build and package the application.  From the command line:
+To build and package the application from the command line:
 
 ```
 mvn clean package

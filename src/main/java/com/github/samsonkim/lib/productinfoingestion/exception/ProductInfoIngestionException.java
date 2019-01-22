@@ -22,23 +22,15 @@
  * SOFTWARE.
  */
 
-package com.github.samsonkim.lib.productinfoingestion.integration;
-
-import com.github.samsonkim.lib.productinfoingestion.parser.FileParser;
-
-import java.util.UUID;
+package com.github.samsonkim.lib.productinfoingestion.exception;
 
 /**
- * Resolves store specific integrations
+ * Base exception class for dealing with checked exceptions
+ * for the product-info-ingestion library
  */
-public interface StoreFactory {
+public class ProductInfoIngestionException extends Exception {
 
-    /**
-     * Returns store specific FileParser instance
-     *
-     * @param storeId
-     * @param storeJournalId
-     * @return
-     */
-    FileParser getFileParser(UUID storeId, UUID storeJournalId);
+    public ProductInfoIngestionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -24,22 +24,43 @@
 
 package com.github.samsonkim.lib.productinfoingestion.parser;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Interface to parse a file to List&lt;T&gt;
+ * File parser that returns a List&lt;T&gt; based on mapper supplied.
+ * Supports fixed width or delimited file formats based on mapper.
  *
  * @param <T>
  */
-public interface FileParser<T> {
+public class FileParserImpl<T> implements FileParser<T>{
+    private final FileParserLineMapper<T> lineMapper;
+
+    public FileParserImpl(FileParserLineMapper<T> lineMapper) {
+        this.lineMapper = lineMapper;
+    }
+
     /**
-     * Parse an InputStream to List&lt;T&gt;
+     * Converts an InputStream to List&lt;T&gt;
+     * Parser continues processing even if there are rows that cannot be mapped to &lt;T&gt;
      *
      * @param inputStream
      * @return
      * @throws IOException
      */
-     List<T> parse(InputStream inputStream) throws IOException;
+    public List<T> parse(InputStream inputStream) throws IOException {
+        //using try-with-resources which ensures that resources will be closed after execution of the program
+        try (Stream<String> stream = new BufferedReader(new InputStreamReader(inputStream)).lines()) {
+            return stream.map(l -> lineMapper.map(l))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
+        }
+    }
 }

@@ -22,49 +22,27 @@
  * SOFTWARE.
  */
 
-package com.github.samsonkim.lib.productinfoingestion.parser;
+package com.github.samsonkim.lib.productinfoingestion.service;
 
-import com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreFixedWidthFileProductRecordMapper;
+import com.github.samsonkim.lib.productinfoingestion.exception.ProductInfoIngestionException;
 import com.github.samsonkim.lib.productinfoingestion.model.ProductRecord;
-import org.junit.Before;
-import org.junit.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-public class FileParserTest {
-
-    private FileParser<ProductRecord> instance;
-
-    @Before
-    public void setUp() throws Exception {
-        instance = new FileParser<>();
-    }
+/**
+ * Service that ingests store product catalogs
+ */
+public interface ProductCatalogIntegrationService {
 
     /**
-     * One record should be skipped due to no pricing data
+     * Ingests store product catalog into the product info ingestion service
      *
-     * @throws IOException
+     * @param storeId
+     * @param fileName
+     * @return
+     * @throws ProductInfoIngestionException
      */
-    @Test
-    public void testParseProductRecord() throws IOException {
-
-        ClassLoader classLoader = getClass().getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream("test-sample.txt");
-
-        UUID storeId = UUID.randomUUID();
-        UUID storeJournalId = UUID.randomUUID();
-
-        SampleStoreFixedWidthFileProductRecordMapper mapper = new SampleStoreFixedWidthFileProductRecordMapper(storeId, storeJournalId);
-
-        List<ProductRecord> results = instance.parse(inputStream, mapper);
-
-        assertNotNull(results);
-        assertEquals(5, results.size());
-    }
+    List<ProductRecord> ingestProductCatalog(UUID storeId, String fileName)
+            throws ProductInfoIngestionException;
 }
