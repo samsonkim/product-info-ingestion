@@ -43,9 +43,9 @@ public class SampleStoreSettings {
     public static final UUID STORE_ID = UUID.randomUUID();
 
     /**
-     * Currency formatter represented in USD
+     * Default Store Locale
      */
-    public static final NumberFormat CURRENCY_FORMATTER = NumberFormat.getCurrencyInstance(Locale.US);
+    public static final Locale DEFAULT_STORE_LOCALE = Locale.US;
 
     /**
      * Tax rate

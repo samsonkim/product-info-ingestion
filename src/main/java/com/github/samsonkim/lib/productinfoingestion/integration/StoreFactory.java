@@ -28,6 +28,8 @@ import com.github.samsonkim.lib.productinfoingestion.integration.samplestore.Sam
 import com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreSettings;
 import com.github.samsonkim.lib.productinfoingestion.parser.FileParserLineMapper;
 
+import java.util.UUID;
+
 /**
  * Resolves store specific integrations
  */
@@ -36,14 +38,15 @@ public class StoreFactory {
     /**
      * Returns store specific FileParserLineMapper instance
      *
-     * @param storeName
+     * @param storeId
+     * @param storeJournalId
      * @return
      */
-    public static FileParserLineMapper getFileParserLineMapper(String storeName) {
-        if ("sample".equalsIgnoreCase(storeName)) {
-            return new SampleStoreFixedWidthFileProductRecordMapper(SampleStoreSettings.STORE_ID);
+    public static FileParserLineMapper getFileParserLineMapper(UUID storeId, UUID storeJournalId) {
+        if (SampleStoreSettings.STORE_ID.equals(storeId)) {
+            return new SampleStoreFixedWidthFileProductRecordMapper(storeId, storeJournalId);
         }
 
-        throw new IllegalArgumentException(String.format("Invalid store: %s", storeName));
+        throw new IllegalArgumentException(String.format("Invalid store: %s", storeId));
     }
 }

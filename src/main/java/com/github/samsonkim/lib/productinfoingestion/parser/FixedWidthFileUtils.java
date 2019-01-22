@@ -53,14 +53,15 @@ public class FixedWidthFileUtils {
     }
 
     /**
-     * Removes right-padded spaces from string
+     * Spaces are trimmed both sides although spec lists string fields
+     * being right-padded
      *
      * @param value
      * @return
      */
     public static Optional<String> toString(String value) {
         return Optional.ofNullable(value)
-                .map(v -> StringUtils.stripEnd(v, " "));
+                .map(v -> StringUtils.trimToNull(v));
     }
 
     /**

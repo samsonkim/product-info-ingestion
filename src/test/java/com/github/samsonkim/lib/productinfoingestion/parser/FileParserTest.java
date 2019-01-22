@@ -46,17 +46,25 @@ public class FileParserTest {
         instance = new FileParser<>();
     }
 
+    /**
+     * One record should be skipped due to no pricing data
+     *
+     * @throws IOException
+     */
     @Test
     public void testParseProductRecord() throws IOException {
 
         ClassLoader classLoader = getClass().getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream("input-sample.txt");
+        InputStream inputStream = classLoader.getResourceAsStream("test-sample.txt");
 
-        SampleStoreFixedWidthFileProductRecordMapper mapper = new SampleStoreFixedWidthFileProductRecordMapper(UUID.randomUUID());
+        UUID storeId = UUID.randomUUID();
+        UUID storeJournalId = UUID.randomUUID();
+
+        SampleStoreFixedWidthFileProductRecordMapper mapper = new SampleStoreFixedWidthFileProductRecordMapper(storeId, storeJournalId);
 
         List<ProductRecord> results = instance.parse(inputStream, mapper);
 
         assertNotNull(results);
-        assertEquals(4, results.size());
+        assertEquals(5, results.size());
     }
 }

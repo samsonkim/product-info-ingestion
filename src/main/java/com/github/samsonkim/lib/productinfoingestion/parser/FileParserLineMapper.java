@@ -24,11 +24,13 @@
 
 package com.github.samsonkim.lib.productinfoingestion.parser;
 
+import java.util.Optional;
+
 /**
  * Interface to map a line from a file to &lt;T&gt;
  *
  * @param <T>
  */
 public interface FileParserLineMapper<T> {
-    T map(String line);
+    Optional<T> map(String line);
 }

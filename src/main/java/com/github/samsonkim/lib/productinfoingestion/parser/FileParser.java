@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,6 +43,7 @@ public class FileParser<T> {
 
     /**
      * Converts an InputStream to List&lt;T&gt;
+     * Parser continues processing even if there are rows that cannot be mapped to &lt;T&gt;
      *
      * @param inputStream
      * @param mapper
@@ -52,8 +54,9 @@ public class FileParser<T> {
         //using try-with-resources which ensures that resources will be closed after execution of the program
         try (Stream<String> stream = new BufferedReader(new InputStreamReader(inputStream)).lines()) {
             return stream.map(l -> mapper.map(l))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
                     .collect(Collectors.toList());
         }
     }
-
 }

@@ -56,7 +56,9 @@ public class FixedWidthFileUtilsTest {
 
         assertEquals(Optional.of("abc"), FixedWidthFileUtils.toString("abc    "));
 
-        assertEquals(Optional.of("  abc"), FixedWidthFileUtils.toString("  abc    "));
+        assertEquals(Optional.of("abc"), FixedWidthFileUtils.toString("  abc    "));
+
+        assertEquals(Optional.of("abc"), FixedWidthFileUtils.toString("  abc"));
 
         assertFalse(FixedWidthFileUtils.toString(null).isPresent());
     }

@@ -25,6 +25,7 @@
 package com.github.samsonkim.lib.productinfoingestion;
 
 import com.github.samsonkim.lib.productinfoingestion.integration.StoreFactory;
+import com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreSettings;
 import com.github.samsonkim.lib.productinfoingestion.model.ProductRecord;
 import com.github.samsonkim.lib.productinfoingestion.parser.FileParser;
 import com.github.samsonkim.lib.productinfoingestion.parser.FileParserLineMapper;
@@ -37,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Command line application to demonstrate parsing a file to a Collection of ProductRecords
@@ -60,10 +62,36 @@ public class ProductInfoIngestionApp {
 
         /*
         TODO storeName, json file handling
+
+        Also pass in storeJournalId, locale in constructor
+
+        Skip 0000 products... only allow products that have pricing
+        Add tests to factor them in
+
+        TODO zero out all others for precedence rule...
+  add tests for it.
+  add tests for the other biz rules too
+
+Store locale in product record.....
+  so multiple can exist that are translated...
+
+
+
+  TODO add catalog service that has commented notes on
+  check for valid store etc, store id
+  creating journal object
+  passing it in
+  peristing product records etc...
          */
 
-        String storeName = "sample";
-        FileParserLineMapper fileParserLineMapper = StoreFactory.getFileParserLineMapper(storeName);
+        UUID storeId = null;
+        UUID storeJournalId = UUID.randomUUID();
+
+        if(fileName.contains("sample")){
+            storeId = SampleStoreSettings.STORE_ID;
+        }
+
+        FileParserLineMapper fileParserLineMapper = StoreFactory.getFileParserLineMapper(storeId, storeJournalId);
 
         FileParser<ProductRecord> fileParser = new FileParser<>();
 
