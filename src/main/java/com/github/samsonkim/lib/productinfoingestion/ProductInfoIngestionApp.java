@@ -86,5 +86,7 @@ public class ProductInfoIngestionApp {
         try (PrintWriter out = new PrintWriter(jsonFileName)) {
             out.println(json);
         }
+
+        System.out.println(String.format("Processed %s records", productRecords.size()));
     }
 }
