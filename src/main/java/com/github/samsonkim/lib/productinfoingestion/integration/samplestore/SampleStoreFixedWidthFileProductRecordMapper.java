@@ -27,8 +27,6 @@ package com.github.samsonkim.lib.productinfoingestion.integration.samplestore;
 import com.github.samsonkim.lib.productinfoingestion.model.ProductRecord;
 import com.github.samsonkim.lib.productinfoingestion.model.UnitOfMeasure;
 import com.github.samsonkim.lib.productinfoingestion.parser.FileParserLineMapper;
-import com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileColumn;
-import com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.Tuple4;
@@ -55,6 +53,11 @@ import static com.github.samsonkim.lib.productinfoingestion.integration.samplest
 import static com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreSettings.FIXED_WIDTH_REGULAR_SPLIT_PRICE_COLUMN;
 import static com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreSettings.FIXED_WIDTH_TAXABLE_FLAG;
 import static com.github.samsonkim.lib.productinfoingestion.integration.samplestore.SampleStoreSettings.TAX_RATE;
+import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils.getFlagValue;
+import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils.toBigDecimal;
+import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils.toBooleanList;
+import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils.toInteger;
+import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils.toStringVal;
 
 /**
  * Mapper class to map a file line to ProductRecord
@@ -114,11 +117,12 @@ public class SampleStoreFixedWidthFileProductRecordMapper
                 .filter(f -> f.equals(true))
                 .map(f -> TAX_RATE);
 
-        Integer productId = toInt(FIXED_WIDTH_PRODUCT_ID_COLUMN, line);
-        String productDescription = toString(FIXED_WIDTH_PRODUCT_DESCRIPTION_COLUMN, line)
+        Integer productId = toInteger(FIXED_WIDTH_PRODUCT_ID_COLUMN, line)
+                .orElse(null);
+        String productDescription = toStringVal(FIXED_WIDTH_PRODUCT_DESCRIPTION_COLUMN, line)
                 .orElse(null);
 
-        Optional<String> productSize = toString(FIXED_WIDTH_PRODUCT_SIZE_COLUMN, line);
+        Optional<String> productSize = toStringVal(FIXED_WIDTH_PRODUCT_SIZE_COLUMN, line);
 
         Instant now = Instant.now();
 
@@ -174,8 +178,10 @@ public class SampleStoreFixedWidthFileProductRecordMapper
                         promotionalDisplaySingularPrice, promotionalSingularPrice));
             } else {
                 //Split price
-                int regularForX = toInt(FIXED_WIDTH_REGULAR_FOR_X_COLUMN, line);
-                int promotionalForX = toInt(FIXED_WIDTH_PROMOTIONAL_FOR_X_COLUMN, line);
+                int regularForX = toInteger(FIXED_WIDTH_REGULAR_FOR_X_COLUMN, line)
+                        .orElse(0);
+                int promotionalForX = toInteger(FIXED_WIDTH_PROMOTIONAL_FOR_X_COLUMN, line)
+                        .orElse(0);
 
                 Tuple2<String, BigDecimal> regularSplitPriceTuple =
                         calculateSplitPricing(regularSplitPrice.orElse(BigDecimal.ZERO), regularForX);
@@ -254,6 +260,12 @@ public class SampleStoreFixedWidthFileProductRecordMapper
         return Optional.empty();
     }
 
+    /**
+     * Checks to see if there is actual value in the price
+     *
+     * @param price
+     * @return
+     */
     protected static Boolean hasValue(Optional<BigDecimal> price) {
         return price.filter(p -> p.compareTo(BigDecimal.ZERO) > 0)
                 .map(p -> Boolean.TRUE)
@@ -261,33 +273,33 @@ public class SampleStoreFixedWidthFileProductRecordMapper
     }
 
     //TODO add tests for below this
-    protected int toInt(FixedWidthFileColumn column, String line) {
-        return FixedWidthFileUtils.toInteger(getSubString(column, line))
-                .orElse(0);
-    }
-
-    protected Optional<String> toString(FixedWidthFileColumn column, String line) {
-        return FixedWidthFileUtils.toString(getSubString(column, line));
-    }
-
-    protected Optional<BigDecimal> toBigDecimal(FixedWidthFileColumn column, String line) {
-        return FixedWidthFileUtils.toBigDecimal(getSubString(column, line));
-    }
-
-    protected List<Boolean> toBooleanList(FixedWidthFileColumn column, String line) {
-        return FixedWidthFileUtils.toBooleanList(getSubString(column, line));
-    }
-
-    protected Optional<Boolean> getFlagValue(List<Boolean> flags, int position) {
-        // Adjust position to account for 0 start index
-        if (position < flags.size()) {
-            return Optional.of(flags.get(position - 1));
-        }
-        return Optional.empty();
-    }
-
-    //Needs to be inclusive
-    private String getSubString(FixedWidthFileColumn column, String line) {
-        return line.substring(column.getStart() - 1, column.getEnd());
-    }
+//    protected int toInt(FixedWidthFileColumn column, String line) {
+//        return FixedWidthFileUtils.toInteger(getSubString(column, line))
+//                .orElse(0);
+//    }
+//
+//    protected Optional<String> toString(FixedWidthFileColumn column, String line) {
+//        return FixedWidthFileUtils.toString(getSubString(column, line));
+//    }
+//
+//    protected Optional<BigDecimal> toBigDecimal(FixedWidthFileColumn column, String line) {
+//        return FixedWidthFileUtils.toBigDecimal(getSubString(column, line));
+//    }
+//
+//    protected List<Boolean> toBooleanList(FixedWidthFileColumn column, String line) {
+//        return FixedWidthFileUtils.toBooleanList(getSubString(column, line));
+//    }
+//
+//    protected Optional<Boolean> getFlagValue(List<Boolean> flags, int position) {
+//        // Adjust position to account for 0 start index
+//        if (position < flags.size()) {
+//            return Optional.of(flags.get(position - 1));
+//        }
+//        return Optional.empty();
+//    }
+//
+//    //Needs to be inclusive
+//    private String getSubString(FixedWidthFileColumn column, String line) {
+//        return line.substring(column.getStart() - 1, column.getEnd());
+//    }
 }

@@ -1,9 +1,12 @@
 [![Build Status](https://travis-ci.com/samsonkim/product-info-ingestion.svg?branch=master)](https://travis-ci.com/samsonkim/product-info-ingestion)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-# product-info-ingestion
+# Product Information Ingestion Library
 
-Product Information Ingestion Library
+Library to integrate with a grocery store's product information system.  The specification can be found [here](https://github.com/prestoqinc/code-exercise-services/blob/master/ProductInformationIntegrationSpec.md). 
 
+A sample store application is provided to demonstrate the features of the library.
+The application accepts a store's product catalog as input and generates a file consisting of a List of ProductRecords in json format.  See Building and running the application section for additional details.
 
 ## Getting Started
 
@@ -68,6 +71,8 @@ This will produce a file(sample.json) which is a JSON list of ProductRecords.
 * [Lombok](https://projectlombok.org/) - POJO Helper Utilities 
 * [Vavr](http://www.vavr.io/) - Functional Java Library 
 * [Commons-lang](https://commons.apache.org/proper/commons-lang/) - Apache Helper Library 
+* [Junit](https://junit.org/junit4/) - Unit testing framework
+* [Mockito](https://site.mockito.org/) - Mocking framework for unit tests 
 
 ## Authors
 
