@@ -59,6 +59,14 @@ public class ProductInfoIngestionApp {
         app.run(fileName);
     }
 
+    /**
+     * Main entry point of application.  Input filename needs "sample" to resolve to
+     * sample store integration
+     *
+     * @param fileName
+     * @throws IOException
+     * @throws ProductInfoIngestionException
+     */
     public void run(String fileName) throws IOException, ProductInfoIngestionException {
         JsonWriter jsonWriter = new JacksonJsonWriter();
 
@@ -78,7 +86,5 @@ public class ProductInfoIngestionApp {
         try (PrintWriter out = new PrintWriter(jsonFileName)) {
             out.println(json);
         }
-
-//        System.out.println(json);
     }
 }

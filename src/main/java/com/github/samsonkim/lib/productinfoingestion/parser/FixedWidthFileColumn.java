@@ -27,12 +27,30 @@ package com.github.samsonkim.lib.productinfoingestion.parser;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * Fixed Width File Column
+ */
 @Builder
 @Data
 public class FixedWidthFileColumn {
 
+    /**
+     * Start position, 1 is lowest value
+     */
     private int start;
-    private int end;        //inclusive
+
+    /**
+     * End position.  Position is inclusive
+     */
+    private int end;
+
+    /**
+     * Column name
+     */
     private String name;
+
+    /**
+     * Column datatype
+     */
     private FixedWidthFileColumnType type;
 }

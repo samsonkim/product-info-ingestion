@@ -223,7 +223,7 @@ public class SampleStoreFixedWidthFileProductRecordMapper
      * Determine whether or not to use singular pricing.
      * False indicates split pricing
      * Empty result indicates no pricing exists
-     * Note: Promotional pricing takes precedence
+     * (NOTE: Promotional pricing takes precedence)
      *
      * @param regularSingularPrice
      * @param promotionalSingularPrice
@@ -271,35 +271,4 @@ public class SampleStoreFixedWidthFileProductRecordMapper
                 .map(p -> Boolean.TRUE)
                 .orElse(Boolean.FALSE);
     }
-
-    //TODO add tests for below this
-//    protected int toInt(FixedWidthFileColumn column, String line) {
-//        return FixedWidthFileUtils.toInteger(getSubString(column, line))
-//                .orElse(0);
-//    }
-//
-//    protected Optional<String> toString(FixedWidthFileColumn column, String line) {
-//        return FixedWidthFileUtils.toString(getSubString(column, line));
-//    }
-//
-//    protected Optional<BigDecimal> toBigDecimal(FixedWidthFileColumn column, String line) {
-//        return FixedWidthFileUtils.toBigDecimal(getSubString(column, line));
-//    }
-//
-//    protected List<Boolean> toBooleanList(FixedWidthFileColumn column, String line) {
-//        return FixedWidthFileUtils.toBooleanList(getSubString(column, line));
-//    }
-//
-//    protected Optional<Boolean> getFlagValue(List<Boolean> flags, int position) {
-//        // Adjust position to account for 0 start index
-//        if (position < flags.size()) {
-//            return Optional.of(flags.get(position - 1));
-//        }
-//        return Optional.empty();
-//    }
-//
-//    //Needs to be inclusive
-//    private String getSubString(FixedWidthFileColumn column, String line) {
-//        return line.substring(column.getStart() - 1, column.getEnd());
-//    }
 }

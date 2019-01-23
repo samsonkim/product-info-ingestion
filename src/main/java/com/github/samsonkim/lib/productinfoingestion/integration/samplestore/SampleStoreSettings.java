@@ -28,7 +28,6 @@ import com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileColumn
 import com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileColumnType;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.UUID;
 

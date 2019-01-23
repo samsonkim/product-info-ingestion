@@ -26,6 +26,7 @@ package com.github.samsonkim.lib.productinfoingestion.writer;
 
 import io.vavr.collection.HashMap;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -41,6 +42,7 @@ public class JacksonJsonWriterTest {
         instance = new JacksonJsonWriter();
     }
 
+    @Ignore
     @Test
     public void testWriteValueAsString() throws JsonException {
         Map<String, String> map = HashMap.of("name", "skim").toJavaMap();

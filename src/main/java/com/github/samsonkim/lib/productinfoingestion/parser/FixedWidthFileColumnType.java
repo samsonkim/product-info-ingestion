@@ -24,6 +24,9 @@
 
 package com.github.samsonkim.lib.productinfoingestion.parser;
 
+/**
+ * Fixed Width File Column Datatypes
+ */
 public enum FixedWidthFileColumnType {
     CURRENCY,
     NUMBER,
