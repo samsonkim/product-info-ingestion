@@ -42,7 +42,6 @@ public class JacksonJsonWriterTest {
         instance = new JacksonJsonWriter();
     }
 
-    @Ignore
     @Test
     public void testWriteValueAsString() throws JsonException {
         Map<String, String> map = HashMap.of("name", "skim").toJavaMap();

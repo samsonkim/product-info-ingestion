@@ -41,59 +41,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class FixedWidthFileUtilsTest {
 
-    @Test
-    public void testToInteger() {
-        assertEquals(Optional.of(567), FixedWidthFileUtils.toInteger("00000567"));
 
-        assertEquals(Optional.of(0), FixedWidthFileUtils.toInteger("00000000"));
-
-        assertEquals(Optional.of(11111111), FixedWidthFileUtils.toInteger("11111111"));
-
-        assertFalse(FixedWidthFileUtils.toInteger(null).isPresent());
-    }
-
-    @Test
-    public void testToString() {
-        assertEquals(Optional.of("abc"), FixedWidthFileUtils.toString("abc"));
-
-        assertEquals(Optional.of("abc"), FixedWidthFileUtils.toString("abc    "));
-
-        assertEquals(Optional.of("abc"), FixedWidthFileUtils.toString("  abc    "));
-
-        assertEquals(Optional.of("abc"), FixedWidthFileUtils.toString("  abc"));
-
-        assertFalse(FixedWidthFileUtils.toString(null).isPresent());
-    }
-
-    /**
-     * Test fixed width columns that map to BigDecimal datatype rounded to 4 decimal places, half down
-     */
-    @Test
-    public void testToBigDecimal() {
-        assertEquals(Optional.of("5.6700"), FixedWidthFileUtils.toBigDecimal("00000567").map(BigDecimal::toString));
-
-        assertEquals(Optional.of("0.6700"), FixedWidthFileUtils.toBigDecimal("00000067").map(BigDecimal::toString));
-
-        assertEquals(Optional.of("1.0000"), FixedWidthFileUtils.toBigDecimal("00000100").map(BigDecimal::toString));
-
-        assertEquals(Optional.of("-5.6700"), FixedWidthFileUtils.toBigDecimal("-0000567").map(BigDecimal::toString));
-
-        assertFalse(FixedWidthFileUtils.toBigDecimal(null).isPresent());
-    }
-
-    @Test
-    public void testToBooleanList(){
-        assertEquals(Arrays.asList(false, true),
-                FixedWidthFileUtils.toBooleanList("NY"));
-
-        assertEquals(Arrays.asList(false, false, true, false, false, false, false, false, false),
-                FixedWidthFileUtils.toBooleanList("NNYNNNNNN"));
-
-        assertEquals(Arrays.asList(false, false, false, false, false, false, false, false, false),
-                FixedWidthFileUtils.toBooleanList("NNNNNNNNN"));
-
-        assertTrue(FixedWidthFileUtils.toBooleanList(null).isEmpty());
-    }
 
     @Test
     public void testGetSubStringFixedWidthColumn(){

@@ -33,7 +33,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -51,12 +53,14 @@ public class ProductCatalogIntegrationServiceImpl implements ProductCatalogInteg
      *
      * @param storeId
      * @param fileName
+     * @param user
      * @return
      * @throws ProductInfoIngestionException
      */
     @Override
     public List<ProductRecord> ingestProductCatalog(UUID storeId,
-                                                    String fileName) throws ProductInfoIngestionException {
+                                                    String fileName,
+                                                    String user) throws ProductInfoIngestionException {
 
         //This will be retrieved from DB system that records this info
         UUID storeJournalId = UUID.randomUUID();
@@ -68,7 +72,18 @@ public class ProductCatalogIntegrationServiceImpl implements ProductCatalogInteg
             InputStream inputStream = new FileInputStream(new File(fileName));
             List<ProductRecord> productRecords = fileParser.parse(inputStream);
 
-            //Add logic to persist to db
+            /*
+             * Add logic to persist to db
+             * - generates id, and other audit attributes (createdBy, createdDateTime, modifiedBy, modifiedDateTime)
+             *
+             *  Simulate DB interaction
+             */
+            Instant now = Instant.now();
+            productRecords.forEach(p -> {
+                p.setId(Optional.of(UUID.randomUUID()));
+                p.setCreatedBy(user);
+                p.setCreatedDateTime(now);
+            });
 
             return productRecords;
         } catch (IOException e) {

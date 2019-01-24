@@ -43,6 +43,7 @@ import java.util.UUID;
  * Command line application to demonstrate parsing a file to a Collection of ProductRecords
  */
 public class ProductInfoIngestionApp {
+    private static final String USER = "ProductInfoIngestionApp";
 
     public static void main(String[] args) throws ProductInfoIngestionException, IOException {
         if (args.length == 0 ||
@@ -80,7 +81,7 @@ public class ProductInfoIngestionApp {
 
         ProductCatalogIntegrationService productCatalogIntegrationService =
                 new ProductCatalogIntegrationServiceImpl(new StoreFactoryImpl());
-        List<ProductRecord> productRecords = productCatalogIntegrationService.ingestProductCatalog(storeId, fileName);
+        List<ProductRecord> productRecords = productCatalogIntegrationService.ingestProductCatalog(storeId, fileName, USER);
 
         String json = jsonWriter.writeValueAsString(productRecords);
         try (PrintWriter out = new PrintWriter(jsonFileName)) {

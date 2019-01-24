@@ -24,14 +24,12 @@
 
 package com.github.samsonkim.lib.productinfoingestion.parser;
 
-import org.apache.commons.lang3.StringUtils;
+import com.github.samsonkim.lib.productinfoingestion.util.ProductInfoIngestionUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Collection of methods that convert field data types to java data types
@@ -39,66 +37,6 @@ import java.util.stream.Collectors;
  * or to throw exception
  */
 public class FixedWidthFileUtils {
-
-    /**
-     * Converts zero left-padded string to integer
-     *
-     * @param value
-     * @return
-     */
-    public static Optional<Integer> toInteger(String value) {
-        return Optional.ofNullable(value)
-                .map(String::trim)
-                .map(s -> Integer.parseInt(s));
-    }
-
-    /**
-     * Spaces are trimmed both sides although spec lists string fields
-     * being right-padded
-     *
-     * @param value
-     * @return
-     */
-    public static Optional<String> toString(String value) {
-        return Optional.ofNullable(value)
-                .map(v -> StringUtils.trimToNull(v));
-    }
-
-    /**
-     * Converts string to BigDecimal for currency file column type
-     * with last 2 digits representing cents.
-     * BigDecimal values are rounded to 4 decimal places half down
-     *
-     * @param value
-     * @return
-     */
-    public static Optional<BigDecimal> toBigDecimal(String value) {
-        return Optional.ofNullable(value)
-                .map(StringBuilder::new)
-                .map(s -> s.insert(s.length() - 2, "."))
-                .map(StringBuilder::toString)
-                .map(s -> new BigDecimal(s).setScale(4, RoundingMode.HALF_DOWN));
-    }
-
-    /**
-     * Convert Y/N flag string to List&lt;Boolean&gt;
-     *
-     * @param value
-     * @return
-     */
-    public static List<Boolean> toBooleanList(String value) {
-        return Optional.ofNullable(value)
-                .map(v -> v.chars()
-                        .mapToObj(c -> {
-                            if (c == 'Y') {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }).collect(Collectors.toList()))
-                .orElse(Collections.emptyList());
-    }
-
 
     /**
      * Converts substring of column to Integer
@@ -109,7 +47,7 @@ public class FixedWidthFileUtils {
      */
     public static Optional<Integer> toInteger(FixedWidthFileColumn column, String line) {
         return getSubString(column, line)
-                .flatMap(s -> FixedWidthFileUtils.toInteger(s));
+                .flatMap(ProductInfoIngestionUtils::toInteger);
     }
 
     /**
@@ -121,7 +59,7 @@ public class FixedWidthFileUtils {
      */
     public static Optional<String> toStringVal(FixedWidthFileColumn column, String line) {
         return getSubString(column, line)
-                .flatMap(s -> FixedWidthFileUtils.toString(s));
+                .flatMap(ProductInfoIngestionUtils::toStringVal);
     }
 
     /**
@@ -133,7 +71,7 @@ public class FixedWidthFileUtils {
      */
     public static Optional<BigDecimal> toBigDecimal(FixedWidthFileColumn column, String line) {
         return getSubString(column, line)
-                .flatMap(s -> FixedWidthFileUtils.toBigDecimal(s));
+                .flatMap(ProductInfoIngestionUtils::toBigDecimal);
     }
 
     /**
@@ -146,7 +84,7 @@ public class FixedWidthFileUtils {
      */
     public static List<Boolean> toBooleanList(FixedWidthFileColumn column, String line) {
         return getSubString(column, line)
-                .map(s -> FixedWidthFileUtils.toBooleanList(s))
+                .map(ProductInfoIngestionUtils::toBooleanList)
                 .orElse(Collections.emptyList());
     }
 

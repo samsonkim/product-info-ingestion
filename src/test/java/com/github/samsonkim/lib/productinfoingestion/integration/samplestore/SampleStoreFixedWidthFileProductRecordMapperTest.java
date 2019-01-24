@@ -36,7 +36,6 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class SampleStoreFixedWidthFileProductRecordMapperTest {
@@ -67,16 +66,15 @@ public class SampleStoreFixedWidthFileProductRecordMapperTest {
         assertEquals(storeId, productRecord.getStoreId());
         assertEquals(storeJournalId, productRecord.getStoreJournalId());
         assertEquals(Locale.US, productRecord.getLocale());
-        assertNotNull(productRecord.getCreatedDateTime());
-        assertNotNull(productRecord.getModifiedDateTime());
+
         assertEquals(80000001, productRecord.getProductID().intValue());
         assertEquals("Kimchi-flavored white rice", productRecord.getProductDescription());
 
         assertEquals("$5.67", productRecord.getRegularDisplayPrice());
         assertEquals("5.6700", productRecord.getRegularCalculatorPrice().toString());
 
-        assertEquals(Optional.of("$0.00"), productRecord.getPromotionalDisplayPrice());
-        assertEquals("0.0000", productRecord.getPromotionalCalculatorPrice().get().toString());
+        assertEquals("$0.00", productRecord.getPromotionalDisplayPrice());
+        assertEquals("0.0000", productRecord.getPromotionalCalculatorPrice().toString());
 
         assertEquals(UnitOfMeasure.EACH, productRecord.getUnitOfMeasure());
 
@@ -121,8 +119,8 @@ public class SampleStoreFixedWidthFileProductRecordMapperTest {
         assertEquals("$10.00", productRecord.getRegularDisplayPrice());
         assertEquals("10.0000", productRecord.getRegularCalculatorPrice().toString());
 
-        assertEquals(Optional.of("$5.49"), productRecord.getPromotionalDisplayPrice());
-        assertEquals("5.4900", productRecord.getPromotionalCalculatorPrice().get().toString());
+        assertEquals("$5.49", productRecord.getPromotionalDisplayPrice());
+        assertEquals("5.4900", productRecord.getPromotionalCalculatorPrice().toString());
     }
 
     @Test
@@ -138,16 +136,16 @@ public class SampleStoreFixedWidthFileProductRecordMapperTest {
         assertEquals("2 for $13.00", productRecord.getRegularDisplayPrice());
         assertEquals("6.5000", productRecord.getRegularCalculatorPrice().toString());
 
-        assertEquals(Optional.of("3 for $18.00"), productRecord.getPromotionalDisplayPrice());
-        assertEquals("6.0000", productRecord.getPromotionalCalculatorPrice().get().toString());
+        assertEquals("3 for $18.00", productRecord.getPromotionalDisplayPrice());
+        assertEquals("6.0000", productRecord.getPromotionalCalculatorPrice().toString());
     }
 
     /**
-     * Test singular promotion price supersedes regular split pricing
+     * Test singular promotion price and regular split pricing
      */
     @Test
-    public void testMapProductRecordSingularPromotionOverRegularSplitPrice() {
-        String line = "14963801 Generic Soda 12-pack                                        00000000 00000549 00001300 00001800 00000002 00000003 NNNNYNNNN   12x12oz";
+    public void testMapProductRecordSingularPromotionAndRegularSplitPrice() {
+        String line = "14963801 Generic Soda 12-pack                                        00000000 00000549 00001300 00000000 00000002 00000000 NNNNYNNNN   12x12oz";
 
         Optional<ProductRecord> productRecordOpt = instance.map(line);
 
@@ -155,15 +153,15 @@ public class SampleStoreFixedWidthFileProductRecordMapperTest {
 
         ProductRecord productRecord = productRecordOpt.get();
 
-        assertEquals("$0.00", productRecord.getRegularDisplayPrice());
-        assertEquals("0.0000", productRecord.getRegularCalculatorPrice().toString());
+        assertEquals("2 for $13.00", productRecord.getRegularDisplayPrice());
+        assertEquals("6.5000", productRecord.getRegularCalculatorPrice().toString());
 
-        assertEquals(Optional.of("$5.49"), productRecord.getPromotionalDisplayPrice());
-        assertEquals("5.4900", productRecord.getPromotionalCalculatorPrice().get().toString());
+        assertEquals("$5.49", productRecord.getPromotionalDisplayPrice());
+        assertEquals("5.4900", productRecord.getPromotionalCalculatorPrice().toString());
     }
 
     /**
-     * Test split promotion price superseds regular singular price
+     * Test singular regular price and split promotion price
      */
     @Test
     public void testMapProductRecordSplitPromotionOverRegularPrice() {
@@ -175,11 +173,11 @@ public class SampleStoreFixedWidthFileProductRecordMapperTest {
 
         ProductRecord productRecord = productRecordOpt.get();
 
-        assertEquals("$0.00", productRecord.getRegularDisplayPrice());
-        assertEquals("0.0000", productRecord.getRegularCalculatorPrice().toString());
+        assertEquals("$5.49", productRecord.getRegularDisplayPrice());
+        assertEquals("5.4900", productRecord.getRegularCalculatorPrice().toString());
 
-        assertEquals(Optional.of("3 for $18.00"), productRecord.getPromotionalDisplayPrice());
-        assertEquals("6.0000", productRecord.getPromotionalCalculatorPrice().get().toString());
+        assertEquals("3 for $18.00", productRecord.getPromotionalDisplayPrice());
+        assertEquals("6.0000", productRecord.getPromotionalCalculatorPrice().toString());
     }
 
     /**
@@ -211,5 +209,4 @@ public class SampleStoreFixedWidthFileProductRecordMapperTest {
 
         assertFalse(productRecordOpt.isPresent());
     }
-
 }

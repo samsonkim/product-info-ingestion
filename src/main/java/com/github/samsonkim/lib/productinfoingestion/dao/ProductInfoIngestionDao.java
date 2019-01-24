@@ -22,28 +22,65 @@
  * SOFTWARE.
  */
 
-package com.github.samsonkim.lib.productinfoingestion.service;
-
-import com.github.samsonkim.lib.productinfoingestion.exception.ProductInfoIngestionException;
-import com.github.samsonkim.lib.productinfoingestion.model.ProductRecord;
+package com.github.samsonkim.lib.productinfoingestion.dao;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service that ingests store product catalogs
+ * Main interface for all dao's of product-info-ingestion library
+ *
+ * @param <T>
  */
-public interface ProductCatalogIntegrationService {
+public interface ProductInfoIngestionDao<T> {
 
     /**
-     * Ingests store product catalog into the product info ingestion service
+     * Get [T] by id
      *
-     * @param storeId
-     * @param fileName
-     * @param user
+     * @param uuid
      * @return
-     * @throws ProductInfoIngestionException
      */
-    List<ProductRecord> ingestProductCatalog(UUID storeId, String fileName, String user)
-            throws ProductInfoIngestionException;
+    Optional<T> get(UUID uuid);
+
+    /**
+     * Insert [T]
+     *
+     * @param t
+     * @return
+     */
+    T insert(T t);
+
+    /**
+     * Update [T]
+     *
+     * @param t
+     * @return
+     */
+    T update(T t);
+
+
+    /**
+     * Save (insert/update) [T]
+     *
+     * @param t
+     * @return
+     */
+    T save(T t);
+
+    /**
+     * Delete [T]
+     *
+     * @param uuid
+     */
+    void delete(UUID uuid);
+
+    /**
+     * Get List[T] based on queryParams
+     *
+     * @param queryParams
+     * @return
+     */
+    List<T> find(Map<String, String> queryParams);
 }

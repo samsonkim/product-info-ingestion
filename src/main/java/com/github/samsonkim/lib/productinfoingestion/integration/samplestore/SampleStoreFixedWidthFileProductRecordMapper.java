@@ -27,14 +27,11 @@ package com.github.samsonkim.lib.productinfoingestion.integration.samplestore;
 import com.github.samsonkim.lib.productinfoingestion.model.ProductRecord;
 import com.github.samsonkim.lib.productinfoingestion.model.UnitOfMeasure;
 import com.github.samsonkim.lib.productinfoingestion.parser.FileParserLineMapper;
-import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import io.vavr.Tuple4;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -58,12 +55,15 @@ import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFil
 import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils.toBooleanList;
 import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils.toInteger;
 import static com.github.samsonkim.lib.productinfoingestion.parser.FixedWidthFileUtils.toStringVal;
+import static com.github.samsonkim.lib.productinfoingestion.util.ProductInfoIngestionUtils.determinePricing;
 
 /**
  * Mapper class to map a file line to ProductRecord
  */
 public class SampleStoreFixedWidthFileProductRecordMapper
         implements FileParserLineMapper<ProductRecord> {
+
+    private static BigDecimal ZERO_VALUE = BigDecimal.ZERO.setScale(4, RoundingMode.HALF_DOWN);
 
     private final NumberFormat currencyFormatter;
     private final Locale locale;
@@ -87,21 +87,26 @@ public class SampleStoreFixedWidthFileProductRecordMapper
     @Override
     public Optional<ProductRecord> map(String line) {
 
-        //Get pricing data
-        Optional<Tuple4<String,
-                BigDecimal,
-                Optional<String>,
-                Optional<BigDecimal>>> pricingTupleOpt = getPricing(line);
+        Optional<BigDecimal> regularSingularPrice = toBigDecimal(FIXED_WIDTH_REGULAR_SINGULAR_PRICE_COLUMN, line);
+        Optional<BigDecimal> regularSplitPrice = toBigDecimal(FIXED_WIDTH_REGULAR_SPLIT_PRICE_COLUMN, line);
+        Optional<Integer> regularForX = toInteger(FIXED_WIDTH_REGULAR_FOR_X_COLUMN, line);
+
+        Optional<BigDecimal> promotionalSingularPrice = toBigDecimal(FIXED_WIDTH_PROMOTIONAL_SINGULAR_PRICE_COLUMN, line);
+        Optional<BigDecimal> promotionalSplitPrice = toBigDecimal(FIXED_WIDTH_PROMOTIONAL_SPLIT_PRICE_COLUMN, line);
+        Optional<Integer> promotionalForX = toInteger(FIXED_WIDTH_PROMOTIONAL_FOR_X_COLUMN, line);
+
+        Optional<Tuple2<String, BigDecimal>> regularPricing = determinePricing(currencyFormatter, regularSingularPrice, regularSplitPrice, regularForX);
+        Optional<Tuple2<String, BigDecimal>> promotionalPricing = determinePricing(currencyFormatter, promotionalSingularPrice, promotionalSplitPrice, promotionalForX);
 
         //Skip record if pricing data is not found
-        if (!pricingTupleOpt.isPresent()) {
+        if (!regularPricing.isPresent() && !promotionalPricing.isPresent()) {
             return Optional.empty();
         }
 
-        Tuple4<String,
-                BigDecimal,
-                Optional<String>,
-                Optional<BigDecimal>> pricingTuple = pricingTupleOpt.get();
+        String regularDisplayPrice = regularPricing.map(Tuple2::_1).orElse(currencyFormatter.format(ZERO_VALUE));
+        BigDecimal regularCalculatorPrice = regularPricing.map(Tuple2::_2).orElse(ZERO_VALUE);
+        String promotionalDisplayPrice = promotionalPricing.map(Tuple2::_1).orElse(currencyFormatter.format(ZERO_VALUE));
+        BigDecimal promotionalCalculatorPrice = promotionalPricing.map(Tuple2::_2).orElse(ZERO_VALUE);
 
         //Get flags
         List<Boolean> flags = toBooleanList(FIXED_WIDTH_FLAGS_COLUMN, line);
@@ -124,151 +129,19 @@ public class SampleStoreFixedWidthFileProductRecordMapper
 
         Optional<String> productSize = toStringVal(FIXED_WIDTH_PRODUCT_SIZE_COLUMN, line);
 
-        Instant now = Instant.now();
-
         return Optional.of(ProductRecord.builder()
                 .storeId(storeId)
                 .storeJournalId(storeJournalId)
                 .productID(productId)
                 .productDescription(productDescription)
-                .regularDisplayPrice(pricingTuple._1)
-                .regularCalculatorPrice(pricingTuple._2)
-                .promotionalDisplayPrice(pricingTuple._3)
-                .promotionalCalculatorPrice(pricingTuple._4)
+                .regularDisplayPrice(regularDisplayPrice)
+                .regularCalculatorPrice(regularCalculatorPrice)
+                .promotionalDisplayPrice(promotionalDisplayPrice)
+                .promotionalCalculatorPrice(promotionalCalculatorPrice)
                 .unitOfMeasure(unitOfMeasure)
                 .productSize(productSize)
                 .taxRate(taxRate)
-                .createdDateTime(now)
-                .modifiedDateTime(now)
                 .locale(locale)
                 .build());
-    }
-
-    /**
-     * Determines whether to use singular or split pricing.
-     *
-     * @param line
-     * @return Optional Pricing tuple representing regular display price, regular calculator price
-     * promotional display price, promotional calculator price.  Empty tuple is returned if no pricing
-     * is defined
-     */
-    protected Optional<Tuple4<String, BigDecimal, Optional<String>, Optional<BigDecimal>>> getPricing(String line) {
-
-        Optional<BigDecimal> regularSingularPrice = toBigDecimal(FIXED_WIDTH_REGULAR_SINGULAR_PRICE_COLUMN, line);
-        Optional<BigDecimal> promotionalSingularPrice = toBigDecimal(FIXED_WIDTH_PROMOTIONAL_SINGULAR_PRICE_COLUMN, line);
-
-        Optional<BigDecimal> regularSplitPrice = toBigDecimal(FIXED_WIDTH_REGULAR_SPLIT_PRICE_COLUMN, line);
-        Optional<BigDecimal> promotionalSplitPrice = toBigDecimal(FIXED_WIDTH_PROMOTIONAL_SPLIT_PRICE_COLUMN, line);
-
-        //Check if we have pricing data
-        Optional<Boolean> useSingularPricing = useSingularPricing(regularSingularPrice,
-                promotionalSingularPrice,
-                regularSplitPrice,
-                promotionalSplitPrice);
-
-        if (useSingularPricing.isPresent()) {
-            if (useSingularPricing.get()) {
-                //Singular price
-                String regularDisplaySingularPrice = currencyFormatter.format(regularSingularPrice.get());
-
-                Optional<String> promotionalDisplaySingularPrice =
-                        promotionalSingularPrice.map(x -> currencyFormatter.format(x));
-
-                return Optional.of(Tuple.of(regularDisplaySingularPrice, regularSingularPrice.get(),
-                        promotionalDisplaySingularPrice, promotionalSingularPrice));
-            } else {
-                //Split price
-                int regularForX = toInteger(FIXED_WIDTH_REGULAR_FOR_X_COLUMN, line)
-                        .orElse(0);
-                int promotionalForX = toInteger(FIXED_WIDTH_PROMOTIONAL_FOR_X_COLUMN, line)
-                        .orElse(0);
-
-                Tuple2<String, BigDecimal> regularSplitPriceTuple =
-                        calculateSplitPricing(regularSplitPrice.orElse(BigDecimal.ZERO), regularForX);
-
-                Tuple2<String, BigDecimal> promotionalSplitPriceTuple =
-                        calculateSplitPricing(promotionalSplitPrice.orElse(BigDecimal.ZERO), promotionalForX);
-
-                return Optional.of(Tuple.of(regularSplitPriceTuple._1,
-                        regularSplitPriceTuple._2,
-                        Optional.ofNullable(promotionalSplitPriceTuple._1),
-                        Optional.ofNullable(promotionalSplitPriceTuple._2)));
-            }
-        }
-
-        //No pricing data is available
-        return Optional.empty();
-    }
-
-    /**
-     * Function to build displaySplitPrice and calculatedSplitPrice
-     *
-     * @param price
-     * @param forX
-     * @return Tuple of displaySplitPrice and calculatedSplitPrice
-     */
-    protected Tuple2<String, BigDecimal> calculateSplitPricing(BigDecimal price, int forX) {
-        return Optional.ofNullable(forX)
-                .filter(x -> x > 0)
-                .map(x -> {
-                    String displayPrice = String.format("%s for %s", x, currencyFormatter.format(price));
-                    BigDecimal calculatedPrice = price.divide(BigDecimal.valueOf(x), 4, RoundingMode.HALF_DOWN);
-                    return Tuple.of(displayPrice, calculatedPrice);
-                })
-                .orElse(Tuple.of(currencyFormatter.format(BigDecimal.ZERO),
-                        BigDecimal.ZERO.setScale(4, RoundingMode.HALF_DOWN)));
-    }
-
-    /**
-     * Determine whether or not to use singular pricing.
-     * False indicates split pricing
-     * Empty result indicates no pricing exists
-     * (NOTE: Promotional pricing takes precedence)
-     *
-     * @param regularSingularPrice
-     * @param promotionalSingularPrice
-     * @param regularSplitPrice
-     * @param promotionalSplitPrice
-     * @return
-     */
-    protected static Optional<Boolean> useSingularPricing(Optional<BigDecimal> regularSingularPrice,
-                                                          Optional<BigDecimal> promotionalSingularPrice,
-                                                          Optional<BigDecimal> regularSplitPrice,
-                                                          Optional<BigDecimal> promotionalSplitPrice) {
-
-        Boolean hasRegularSingularPrice = hasValue(regularSingularPrice);
-        Boolean hasPromotionalSingularPrice = hasValue(promotionalSingularPrice);
-        Boolean hasRegularSplitPrice = hasValue(regularSplitPrice);
-        Boolean hasPromotionalSplitPrice = hasValue(promotionalSplitPrice);
-
-        if (hasPromotionalSingularPrice) {
-            return Optional.of(Boolean.TRUE);
-        }
-
-        if (hasPromotionalSplitPrice) {
-            return Optional.of(Boolean.FALSE);
-        }
-
-        if (hasRegularSingularPrice) {
-            return Optional.of(Boolean.TRUE);
-        }
-
-        if (hasRegularSplitPrice) {
-            return Optional.of(Boolean.FALSE);
-        }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Checks to see if there is actual value in the price
-     *
-     * @param price
-     * @return
-     */
-    protected static Boolean hasValue(Optional<BigDecimal> price) {
-        return price.filter(p -> p.compareTo(BigDecimal.ZERO) > 0)
-                .map(p -> Boolean.TRUE)
-                .orElse(Boolean.FALSE);
     }
 }

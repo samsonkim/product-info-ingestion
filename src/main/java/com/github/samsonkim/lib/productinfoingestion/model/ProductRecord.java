@@ -93,13 +93,13 @@ public class ProductRecord implements Persistable {
      * User friendly promotional price
      */
     @JsonProperty
-    private Optional<String> promotionalDisplayPrice;
+    private String promotionalDisplayPrice;
 
     /**
      * Promotional price for calculations
      */
     @JsonProperty
-    private Optional<BigDecimal> promotionalCalculatorPrice;
+    private BigDecimal promotionalCalculatorPrice;
 
     /**
      * Unit of measure

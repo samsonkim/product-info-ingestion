@@ -75,6 +75,7 @@ public class ProductCatalogIntegrationServiceImplTest {
 
         UUID storeId = UUID.randomUUID();
         String fileName = "src/test/resources/test-sample.txt";
+        String user = "testUser";
 
         ProductRecord productRecord = ProductRecord.builder()
                 .build();
@@ -87,7 +88,7 @@ public class ProductCatalogIntegrationServiceImplTest {
         when(storeFactory.getFileParser(any(UUID.class), any(UUID.class)))
             .thenReturn(fileParser);
 
-        List<ProductRecord> response = instance.ingestProductCatalog(storeId, fileName);
+        List<ProductRecord> response = instance.ingestProductCatalog(storeId, fileName, user);
 
         assertEquals(list, response);
 
@@ -100,11 +101,12 @@ public class ProductCatalogIntegrationServiceImplTest {
 
         UUID storeId = UUID.randomUUID();
         String fileName = "unknown";
+        String user = "testUser";
 
         when(storeFactory.getFileParser(any(UUID.class), any(UUID.class)))
                 .thenReturn(fileParser);
 
-        instance.ingestProductCatalog(storeId, fileName);
+        instance.ingestProductCatalog(storeId, fileName, user);
 
         verify(storeFactory).getFileParser(any(UUID.class), any(UUID.class));
     }
